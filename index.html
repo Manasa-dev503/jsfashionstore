@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Store</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        header{
+            background-color: black;
+            color: white;
+            margin-bottom: 20px;
+
+        }
+        .mynav{
+            display: inline-block;
+            text-decoration: none;
+
+
+        }
+        a{
+            text-decoration: none;
+            color: white;
+
+        }
+        a:hover{
+            text-decoration: none;
+        }
+        .card{
+            border: 1px solid gray;
+            width: 250px;
+            height: 300px;
+            box-shadow: 2px 2px 5px gray;
+            margin: 10px;
+            display: inline-block;
+        }
+        .cardhead{
+            border-style: none none solid none;
+            border-color: gray;
+            text-align: center;
+        }
+        .cardbody{
+            border-style: none none solid none;
+            border-color: gray;
+        }
+        .search{
+            border-style: none none groove none;
+            width: 20%;
+            font-size: 18px;
+            outline: 0;
+        }
+        .search:focus{
+            border-style: none none groove none;
+            outline: 0;
+
+
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="mynav">
+            <a href="index.html"><h3>Fashion Store</h3></a>
+        </div>
+        <div style="float: right; ">
+            <div class="mynav">
+                <a href="javascript:display('productscontainer')" style="padding: 20px;">Products</a>
+            </div>
+            <div class="mynav">
+                <a href="javascript:display('displaycart')" style="color: black; font-size: 25px; padding: 20px;">&#128722;<sup id="cartlength" style="color: white;"></sup></a>
+            </div>
+
+        </div>
+    </header>
+    <div id="productscontainer" style="display: block; display: flex;">
+        <div style="width: 20%; height: fit-content; border-style: solid; border-color: gray; box-shadow: 3px 3px 7px gray; display: inline-block; padding-left: 20px;">
+            <h4>Colour</h4>
+            <input type="checkbox" name="colour" id="colour" value="Red" onchange="pfilter()"/> Red <br>
+            <input type="checkbox" name="colour" id="colour"  value="Blue" onchange="pfilter()"/> Blue <br>
+            <input type="checkbox" name="colour" id="colour" value="Green" onchange="pfilter()"/> Green <br>
+            <h4>Gender</h4>
+            <input type="checkbox" name="gender" id="gender" value="Men" onchange="pfilter()" /> Men <br>
+            <input type="checkbox" name="gender" id="gender" value="Women" onchange="pfilter()"/> Women <br>
+            <h4>Price</h4>
+            <input type="checkbox" name="price" id="price" value="[0,250]" onchange="pfilter()"/> 0-Rs250 <br>
+            <input type="checkbox" name="price" id="price" value="[251,450]" onchange="pfilter()"/> Rs251-450 <br>
+            <input type="checkbox" name="price" id="price" value="[451]" onchange="pfilter()"/> Rs450 <br>
+            <h4>Type</h4>
+            <input type="checkbox" name="type" id="type" value="Polo" onchange="pfilter()"/> Polo <br>
+            <input type="checkbox" name="type" id="type" value="Hoodie" onchange="pfilter()"/> Hoodie <br>
+            <input type="checkbox" name="type" id="type" value="Basic" onchange="pfilter()"/> Basic <br>
+
+
+
+
+
+
+        </div>
+        
+            <div style="width: 80%; display: inline-block;">
+                <center><input type="text" class="search" id="search" placeholder="search for products" onkeyup="searchproducts()"/>
+                <!--<button type="submit">&#128269</button>-->
+                
+                <br><br></center>
+                
+                <div id="displayproducts"></div>
+            </div>
+
+       
+    </div>
+    <div id="displaycart" style="display: none;">
+
+    </div>
+    <script>
+        var colour = []
+        var gender = []
+        var price = []
+        var type = []
+        function pfilter(){
+            colour=[]
+            gender=[]
+            price=[]
+            type=[]
+            var c = document.getElementsByName('colour')
+            for(i=0;i<c.length;i++){
+                if(c[i].checked){
+                    colour.push(c[i].value)
+                }
+            }
+            var g = document.getElementsByName('gender')
+            for(i=0;i<g.length;i++){
+                if(g[i].checked){
+                    gender.push(g[i].value)
+                }
+            }
+            var p = document.getElementsByName('price')
+            for(i=0;i<p.length;i++){
+                if(p[i].checked){
+                    price.push([...JSON.parse(p[i].value)])
+                }
+            }
+            console.log(price)
+            var t = document.getElementsByName('type')
+            for(i=0;i<t.length;i++){
+                if(t[i].checked){
+                    type.push(t[i].value)
+                }
+            }
+            Products()
+        }
+        var cart = []
+        var search = document.getElementById("search").value
+        Products();
+        function searchproducts(){
+            search = document.getElementById("search").value.toLowerCase()
+            Products()
+        }
+        function Productscard(product){
+            var card = document.createElement('div')
+            card.setAttribute('class','card')
+            var cardheader = document.createElement('div')
+            cardheader.setAttribute('class','cardhead')
+            cardheader.innerHTML = product.name
+            card.appendChild(cardheader)
+            var cardbody = document.createElement('div')
+            cardbody.setAttribute('class','cardbody')
+            var image = document.createElement('img')
+            image.setAttribute('src',product.imageURL)
+            image.setAttribute('width','250px')
+            image.setAttribute('height','220px')
+            cardbody.appendChild(image)
+            card.appendChild(cardbody)
+            var cardfooter = document.createElement('div')
+            var price = document.createElement('b')
+            price.innerHTML = "Rs::"+product.price
+            price.style.marginLeft = "20px"
+            price.style.margin = "20px"
+            cardfooter.appendChild(price)
+            var addtocart = document.createElement('button')
+            addtocart.innerHTML = "Add to cart"
+            addtocart.style.margin = "20px"
+            addtocart.setAttribute('type','button')
+            addtocart.onclick = function(){
+                //console.log(product)
+                cart.push(product)
+                console.log(cart)
+                if(cart.length>0){
+                    var cartlength = document.getElementById('cartlength')
+                    cartlength.innerHTML = cart.length
+                }
+            }
+
+            cardfooter.appendChild(addtocart)
+            card.appendChild(cardfooter)
+            return card;
+        }
+        function Products(){
+            document.getElementById("displayproducts").innerHTML=""
+            axios.get("https://geektrust.s3.ap-southeast-1.amazonaws.com/coding-problems/shopping-cart/catalogue.json").then(function(res){
+            //console.log(res.data)
+            var displayproducts = document.getElementById('displayproducts')
+            res.data.filter(function(product){
+                var card;
+                if(product.name.toLowerCase().indexOf(search)!=-1 || search==""){
+                    if(colour.length!=0){
+                        for(var i=0;i<=colour.length-1;i++){
+                            if(product.color==colour[i]){
+                                card = Productscard(product)
+                                displayproducts.appendChild(card)
+                            }
+                        }
+                    }
+                    if(gender.length!=0){
+                        for(var i=0;i<=gender.length-1;i++){
+                            if(product.gender==gender[i]){
+                                card = Productscard(product)
+                                displayproducts.appendChild(card)
+                            }
+                        }
+                    }
+                    if(price.length!=0){
+                        for(var i=0;i<=price.length-1;i++){
+                            if(price[i].length==2 && product.price>=price[i][0] && product.price<=price[i][1]){
+                                card = Productscard(product)
+                                displayproducts.appendChild(card)
+                            }
+                            else if(price[i].length==1 && product.price>=price[i][0]){
+                                card = Productscard(product)
+                                displayproducts.appendChild(card)
+                            }
+                        }
+                    }
+                    if(type.length!=0){
+                        for(var i=0;i<=type.length-1;i++){
+                            if(product.type==type[i]){
+                                card = Productscard(product)
+                                displayproducts.appendChild(card)
+                            }
+                        }
+                    }
+                    if((colour.length==0 && gender.length==0 && price.length==0 && type.length==0) && product.quantity!=0){
+                        card = Productscard(product)
+                        displayproducts.appendChild(card)
+                        
+                    }
+                }
+            })
+            })
+        }
+    
+        function display(blockname){
+            if(blockname=='displaycart'){
+                document.getElementById('productscontainer').style.display="none"
+                document.getElementById('displaycart').style.display="block"
+                //var cartdetails = document.createElement('div')
+                document.getElementById('displaycart').innerHTML=""
+                if(cart.length>0){
+                    var carttable = document.createElement('table')
+                    //carttable.setAttribute('border','1')
+                    var totalprice = 0
+                    cart.forEach(function(cartitem,i){
+                        var cartrow = document.createElement('tr')
+                        var cartcolumn1 = document.createElement('td')
+                        var cartimage = document.createElement('img')
+                        cartimage.setAttribute('src',cartitem.imageURL)
+                        cartimage.setAttribute('width','90px')
+                        cartimage.setAttribute('height','75px')
+                        cartcolumn1.appendChild(cartimage)
+                        var cartcolumn2 = document.createElement('td')
+                        var cartname = document.createElement('b')
+                        cartname.innerHTML = cartitem.name+"<br>"
+                        var cartprice = document.createElement('b')
+                        cartprice.innerHTML = "Rs::"+cartitem.price
+                        cartcolumn2.appendChild(cartname)
+                        cartcolumn2.appendChild(cartprice)
+                        var cartcolumn3 = document.createElement('td')
+                        var quantity = document.createElement('select')
+                        quantity.setAttribute('id','qty')
+                        var q = 1
+                        for(let j=1;j<=5;j++){
+                            var opt = document.createElement('option')
+                            opt.setAttribute('value',j)
+                            opt.innerHTML="qty:"+j
+                            quantity.appendChild(opt)
+                        }
+                        cartcolumn3.appendChild(quantity)
+                        quantity.onchange=function(){
+                            q = parseInt(document.getElementById('qty').value)
+                            if(q==1){
+                                totalprice+=cartitem.price*q
+                            }
+                            else if(q>1){
+                                totalprice+=cartitem.price*(q-1)
+                            }
+                            //console.log(totalprice) 
+                            document.getElementById("totalprice").innerHTML="Total Price::"+totalprice
+
+                        }
+                        //console.log(document.getElementById('qty').value)
+                        totalprice+=cartitem.price*q
+                        console.log(totalprice)
+                        var cartcolumn4 = document.createElement('td')
+                        var remove = document.createElement('button')
+                        remove.innerHTML="Remove"
+                        remove.setAttribute('type','button')
+                        remove.onclick = function(){
+                            console.log(i)
+                            cart.splice(i,1)
+                            if(cart.length>=0){
+                                if(cart.length==0){
+                                    document.getElementById('cartlength').innerHTML=""
+                                }
+                                else{
+                                    var cartlength = document.getElementById('cartlength')
+                                    cartlength.innerHTML = cart.length
+
+                                }
+                                
+                            }
+                            display('displaycart')
+
+                        }
+                        cartcolumn4.appendChild(remove)
+                        cartrow.appendChild(cartcolumn1)
+                        cartrow.appendChild(cartcolumn2)
+                        cartrow.appendChild(cartcolumn3)
+                        cartrow.appendChild(cartcolumn4)
+                        carttable.appendChild(cartrow)
+                    })
+                    //cartdetails.appendChild(carttable)
+                    var tablefooter = document.createElement('tr')
+                    tablefooter.setAttribute('colspan','4')
+                    tablefooter.setAttribute('align','center')
+                    var tablefootdata = document.createElement('td')
+                    tablefootdata.setAttribute("id","totalprice")
+                    tablefootdata.setAttribute('colspan','4')
+                    tablefootdata.innerHTML="Total Price:"+totalprice
+                    tablefooter.appendChild(tablefootdata)
+                    carttable.appendChild(tablefooter)
+                    document.getElementById('displaycart').appendChild(carttable)
+                
+                }
+                else{
+                    var cartempty = document.createElement('h1')
+                    cartempty.setAttribute('align','center')
+                    cartempty.innerHTML="Your Cart is Empty"
+                    document.getElementById('displaycart').appendChild(cartempty)
+                }
+            }
+            else if(blockname=='productscontainer'){
+                document.getElementById('productscontainer').style.display="block"
+                document.getElementById('productscontainer').style.display="flex"
+                document.getElementById('displaycart').style.display="none"
+                
+            }
+        }
+
+        
+        
+
+
+
+    </script>
+    
+</body>
+</html>
